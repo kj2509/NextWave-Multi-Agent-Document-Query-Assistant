@@ -1,4 +1,4 @@
-# TalentHC / ADNOC Multi-Agent Document QA
+# NextWave Multi-Agent Document QA
 
 An AI-powered assistant for querying enterprise documents (PDF/TXT/PPTX).  
 Front-end in Streamlit, back-end API in FastAPI, retrieval via FAISS + OpenAI embeddings, and an agent built with LangChain.
