@@ -6,8 +6,8 @@ mkdir -p backend frontend shared uploads
 
 # Move known files into the new structure if present
 [ -f main.py ]   && mv -vn main.py backend/main.py
-[ -f agent.py ]  && mv -vn agent.py backend/agent.py
-[ -f vector.py ] && mv -vn vector.py backend/vector.py
+[ -f agent.py ]  && mv -vn agent.py shared/agent.py
+[ -f vector.py ] && mv -vn vector.py shared/vector.py
 [ -f app.py ]    && mv -vn app.py frontend/app.py
 
 echo '✅ Restructure complete.'
