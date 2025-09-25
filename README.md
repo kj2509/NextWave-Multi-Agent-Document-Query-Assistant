@@ -135,6 +135,4 @@ This will create `backend/` and `frontend/` and move files accordingly. Review t
 
 ---
 
-## 📝 License
 
-MIT (or your choice)
