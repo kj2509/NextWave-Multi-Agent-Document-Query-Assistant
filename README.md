@@ -1,91 +1,140 @@
-# NextWave Multi-Agent Document QA
+# NextWave Multi‑Agent Document Query Assistant
 
-An AI-powered assistant for querying enterprise documents (PDF/TXT/PPTX).  
-Front-end in Streamlit, back-end API in FastAPI, retrieval via FAISS + OpenAI embeddings, and an agent built with LangChain.
+An enterprise‑style multi‑agent assistant for querying documents (PDF, TXT, PPTX).  
+This repo uses a **frontend / backend / shared** layout for clean separation of UI and API logic.
 
-## ✨ Features
-- **Chat UI (Streamlit)** that talks to a local API endpoint.  
-- **FastAPI backend** with a single `/ask` route that invokes the agent and returns plain text answers.  
-- **Retrieval-Augmented Generation** over your docs using **FAISS** + **OpenAI embeddings (`text-embedding-3-small`)**.  
-- **LangChain agent** (OpenAI by default; Groq commented as an alternative) with an ADNOC-focused system prompt and a retriever tool.  
+---
 
-## 🧭 Architecture
+## 🚀 Features
+- **FastAPI backend** exposing `/ask` for question answering over your document corpus.
+- **Streamlit frontend** that chats with the backend.
+- **Retrieval‑Augmented Generation (RAG)** using FAISS + OpenAI embeddings.
+- **LangChain agent** with optional Groq support.
+- **Modular structure** with room for shared utilities.
+
+---
+
+## 📦 Repository Structure
+
 ```
-Streamlit UI ──► FastAPI /ask ──► LangChain Agent ──► Retriever (FAISS + Embeddings)
-      ▲                                                     │
-      └──────────────────── displays answer ◄───────────────┘
+backend/                 # API, agent logic, vector store setup, .env loading
+  main.py                # FastAPI app entrypoint (uvicorn main:app --port 8080)
+  agent.py               # Agent + tools (retriever) + system prompt
+  vector.py              # Loaders, splitters, embeddings, FAISS index
+frontend/                # UI layer (Streamlit)
+  app.py                 # Streamlit entry (streamlit run app.py)
+shared/                  # (optional) shared utilities/configs used by both sides
+uploads/                 # Place your source docs here: .pdf, .txt, .pptx
+requirements.txt
+README.md
 ```
 
-## 📁 Repo structure
-```
-app.py        # Streamlit front-end chat UI (posts to localhost:8080/ask)
-main.py       # FastAPI server exposing POST /ask
-agent.py      # LangChain agent + retriever tool + system prompt
-vector.py     # Loaders, splitters, OpenAI embeddings, FAISS retriever (uploads/)
-uploads/      # Put your .pdf, .txt, .pptx here
-```
+> If you migrated from a flat layout, you can use the provided `restructure.sh` to create folders and move files accordingly.
 
-## 🔐 Environment variables (.env)
-Create a `.env` file in the project root:
+---
+
+## 🔐 Environment Variables
+
+Create a `.env` at the **project root** (and/or ensure your backend loads from here):
 
 ```
 # LLM providers
 OPENAI_API_KEY=your_openai_key
 GROQ_API_KEY=your_groq_key
 
-# LangChain / LangSmith (optional but supported by your codebase)
+# LangChain / LangSmith (optional)
 LANGCHAIN_API_KEY=your_langchain_key
 LANGCHAIN_PROJECT=your_project_name
-LANGSMITH_TRACING=true_or_false
+LANGSMITH_TRACING=false
 LANGSMITH_ENDPOINT=https://api.smith.langchain.com
 ```
 
-## 🧱 Installation
+- **OPENAI_API_KEY** is required for embeddings (default: `text-embedding-3-small`) and the default chat model.
+- **GROQ_API_KEY** is optional if you switch to Groq/Llama models in `backend/agent.py`.
 
-**Python 3.10+** is recommended.
+---
+
+## 🧰 Installation
+
+> Python **3.10+** recommended.
 
 ```bash
-# 1) Clone and enter the project
-git clone <your-repo-url>
-cd <your-repo>
+# 1) Clone & enter
+git clone https://github.com/kj2509/NextWave-Multi-Agent-Document-Query-Assistant.git
+cd NextWave-Multi-Agent-Document-Query-Assistant
 
-# 2) Create & activate a virtual env
+# 2) (Optional) Create a venv
 python -m venv .venv
-# Windows:
-.venv\Scripts\activate
+# Windows: .venv\Scripts\activate
 # macOS/Linux:
 source .venv/bin/activate
 
-# 3) Install dependencies
+# 3) Install deps
 pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-## 📂 Add documents
-Place your source files in `uploads/`:
-- Supported: **.pdf**, **.txt**, **.pptx**
+---
 
-## ▶️ How to run
+## 📂 Add Documents
 
-### 1) Start the API (backend)
+Place `.pdf`, `.txt`, and `.pptx` files under `uploads/`. The backend will index them into FAISS on demand (or at startup, depending on your implementation).
+
+---
+
+## ▶️ Running
+
+Open **two terminals** (same venv).
+
+### 1) Start the backend (API)
 ```bash
+cd backend
 uvicorn main:app --host 0.0.0.0 --port 8080 --reload
 ```
+- Exposes `POST /ask` that accepts JSON: `{"question": "..."}` and returns `{"answer": "..."}`.
 
-### 2) Start the UI (front-end)
-In a second terminal (same venv):
+### 2) Start the frontend (UI)
 ```bash
+cd frontend
 streamlit run app.py
 ```
+- The UI should call `http://localhost:8080/ask` by default. Update the URL in `frontend/app.py` if you change ports/hosts.
 
-## ⚙️ Configuration & Switching Models
+---
 
-- **Default LLM**: OpenAI (`gpt-4o-mini`) with low temperature for factual responses.  
-- **Groq (optional)**: In `agent.py`, uncomment the Groq block and comment the OpenAI block to use **Llama 3.3 70B**.  
-- **Embeddings**: OpenAI `text-embedding-3-small` for indexing. Requires `OPENAI_API_KEY`.
+## 🔄 Switching Models
+
+- **Default**: OpenAI chat model (configured in `backend/agent.py`), low temperature for factual responses.
+- **Groq**: Uncomment the Groq block in `backend/agent.py` and set `GROQ_API_KEY` in `.env`.
+- **Embeddings**: OpenAI `text-embedding-3-small` by default; ensure `OPENAI_API_KEY` is set.
+
+---
 
 ## ❓ Troubleshooting
 
-- **UI says it can’t connect to backend**: Make sure the FastAPI server is running on **port 8080** before launching Streamlit.  
-- **No answers or empty output**: Check your `.env` (OpenAI key is required for embeddings & default chat), and ensure `uploads/` has indexable files.  
-- **500 from `/ask`**: The API wraps agent errors and returns HTTP 500 with “Agent failed to respond.” Inspect your server logs for the exception.
+- **Frontend cannot connect to backend**  
+  Ensure the FastAPI server is running on **port 8080** before launching Streamlit, or update the frontend URL.
+
+- **Empty or no answers**  
+  Verify `.env` variables and that `uploads/` contains readable documents.
+
+- **HTTP 500 from `/ask`**  
+  Check backend logs; exceptions inside agent/retriever will bubble up. Make sure your keys are valid and models available.
+
+---
+
+## 🛠 Optional: Restructure from Flat Layout
+
+If your repo has `main.py`, `app.py`, `agent.py`, `vector.py` at root, run:
+
+```bash
+bash restructure.sh
+```
+
+This will create `backend/` and `frontend/` and move files accordingly. Review the script before running.
+
+---
+
+## 📝 License
+
+MIT (or your choice)
