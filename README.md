@@ -19,11 +19,11 @@ This repo uses a **frontend / backend / shared** layout for clean separation of 
 ```
 backend/                 # API, agent logic, vector store setup, .env loading
   main.py                # FastAPI app entrypoint (uvicorn main:app --port 8080)
-  agent.py               # Agent + tools (retriever) + system prompt
-  vector.py              # Loaders, splitters, embeddings, FAISS index
 frontend/                # UI layer (Streamlit)
   app.py                 # Streamlit entry (streamlit run app.py)
 shared/                  # (optional) shared utilities/configs used by both sides
+  agent.py               # Agent + tools (retriever) + system prompt
+  vector.py              # Loaders, splitters, embeddings, FAISS index
 uploads/                 # Place your source docs here: .pdf, .txt, .pptx
 requirements.txt
 README.md
