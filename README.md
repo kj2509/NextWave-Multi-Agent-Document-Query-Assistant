@@ -88,14 +88,12 @@ Open **two terminals** (same venv).
 
 ### 1) Start the backend (API)
 ```bash
-cd backend
 uvicorn main:app --host 0.0.0.0 --port 8080 --reload
 ```
 - Exposes `POST /ask` that accepts JSON: `{"question": "..."}` and returns `{"answer": "..."}`.
 
 ### 2) Start the frontend (UI)
 ```bash
-cd frontend
 streamlit run app.py
 ```
 - The UI should call `http://localhost:8080/ask` by default. Update the URL in `frontend/app.py` if you change ports/hosts.
